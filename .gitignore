@@ -22,14 +22,14 @@ sysinfo.txt
 # ===================================== #
 [Ee]xported[Oo]bj/
 .vs/
-/*.userprefs
-/*.csproj
-/*.pidb
-/*.suo
-/*.sln*
-/*.user
-/*.unityproj
-/*.booproj
+/NFC_4_Unity_Plugin/*.userprefs
+/NFC_4_Unity_Plugin/*.csproj
+/NFC_4_Unity_Plugin/*.pidb
+/NFC_4_Unity_Plugin/*.suo
+/NFC_4_Unity_Plugin/*.sln*
+/NFC_4_Unity_Plugin/*.user
+/NFC_4_Unity_Plugin/*.unityproj
+/NFC_4_Unity_Plugin/*.booproj
 
 
 # specific folders:
