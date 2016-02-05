@@ -34,6 +34,7 @@ sysinfo.txt
 
 # specific folders:
 /NFC_4_Unity_Plugin/Library/
+/NFC_4_Unity_Plugin/Assets/Plugins/Android/
 
 # eclipse specific git ignore
 *.pydevproject
