@@ -17,6 +17,20 @@ sysinfo.txt
 *.DS_Store
 /undeployed/
 
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+[Ee]xported[Oo]bj/
+.vs/
+/*.userprefs
+/*.csproj
+/*.pidb
+/*.suo
+/*.sln*
+/*.user
+/*.unityproj
+/*.booproj
+
 
 # specific folders:
 /NFC_4_Unity_Plugin/Library/
