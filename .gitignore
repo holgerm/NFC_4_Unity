@@ -57,3 +57,6 @@ local.properties
 
 # Locally stored "Eclipse launch configurations"
 *.launch
+
+# Java stuff:
+*.class
