@@ -35,17 +35,28 @@ public abstract class NFCWriter {
 	 * @return
 	 */
 	public String write(String text) {
-		if (tag == null)
-			return "ERROR: No tag given";
-		try {
-			tag.connect();
-			Log.i(this.getClass().toString(), "Connect is ok.");
-		} catch (IOException ioe) {
-			Log.i(this.getClass().toString(), "ERROR: Connect is NOT ok.");
+		String feedback = "OK";
+		if (tag == null) {
+			feedback = "ERROR: No tag given";
+			Log.i(this.getClass().toString(), feedback);
+			return feedback;
 		}
+		try {
+			if (!tag.isConnected()) {
+				tag.connect();
+			}
 
-		return doWrite(text);
-		// TODO Auto-generated method stub
-
+			feedback = doWrite(text);
+		} catch (IOException ioe) {
+			feedback = "ERROR: Connect is NOT ok.";
+			Log.i(this.getClass().toString(), feedback);
+			return feedback;
+		} catch (Exception exc) {
+			feedback = "ERROR: Exception thrown: " + exc.getClass() + ", "
+					+ exc.getMessage();
+			Log.i(this.getClass().toString(), feedback);
+			return feedback;
+		}
+		return feedback;
 	}
 }
