@@ -295,13 +295,14 @@ public class NFCPlugin extends UnityPlayerActivity {
 	 * @return The feedback of the last call to the writer.
 	 */
 	public static String writeTestContent() {
-		Log.i(NFCPlugin.class.toString(), "We will write test content.");
 		if (writer != null) {
-			writer.write("Test text");
+			Log.i(NFCPlugin.class.toString(),
+					"Writer ok. We will write test content.");
+			return writer.write("Test text");
 		} else {
 			Log.i(NFCPlugin.class.toString(), "WRITER NOT INITIALIZED!");
+			return "WRITER NOT INITIALIZED!";
 		}
 
-		return "OK";
 	}
 }
