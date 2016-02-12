@@ -16,6 +16,8 @@ public class NFC_Access : MonoBehaviour
 			return;
 		AndroidJNI.AttachCurrentThread ();
 		pluginTutorialActivityJavaClass = new AndroidJavaClass ("com.questmill.nfc.NFCPlugin");
+
+		Debug.Log ("STart: tag_output_text set: " + (tag_output_text == null));
 #endif
 	}
 
@@ -24,9 +26,16 @@ public class NFC_Access : MonoBehaviour
 #if UNITY_ANDROID 
 		if (RuntimePlatform.Android != Application.platform) 
 			return;
-		if (pluginTutorialActivityJavaClass != null) {
-			tag_output_text.text = pluginTutorialActivityJavaClass.CallStatic<string> ("getValue");
+		if (pluginTutorialActivityJavaClass == null) {
+			Debug.Log ("pluginTutorialActivityJavaClass is null");
+			return;
 		}
+		if (tag_output_text == null) {
+			Debug.Log ("tag_output_text is null");
+			return;
+		}
+		tag_output_text.text = pluginTutorialActivityJavaClass.CallStatic<string> ("getValue");
+
 #endif
 	}
 
