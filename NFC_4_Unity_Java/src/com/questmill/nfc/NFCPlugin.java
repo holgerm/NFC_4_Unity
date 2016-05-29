@@ -153,7 +153,7 @@ public class NFCPlugin extends UnityPlayerActivity {
 		}
 		Log.i(NFCPlugin.class.toString(),
 				"read: " + value + "; tag = " + tag.toString());
-//		UnityPlayer.UnitySendMessage("NFCText", "NFCRead", value);
+		UnityPlayer.UnitySendMessage("NFCText", "NFCRead", "ID: " + id + "\nTech:\n" + tech + "\n\nValue: " + value);
 	}
 
 	private String readTech(Intent intent) {
