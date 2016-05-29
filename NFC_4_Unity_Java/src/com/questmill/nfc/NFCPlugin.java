@@ -10,10 +10,7 @@ import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareClassic;
-import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.NfcF;
-import android.nfc.tech.TagTechnology;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -21,6 +18,7 @@ import android.util.Log;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.primitives.Bytes;
+import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
 
 public class NFCPlugin extends UnityPlayerActivity {
@@ -49,13 +47,6 @@ public class NFCPlugin extends UnityPlayerActivity {
 			.put((byte) 0x20, "urn:epc:pat:").put((byte) 0x21, "urn:epc:raw:")
 			.put((byte) 0x22, "urn:epc:").put((byte) 0x23, "urn:nfc:").build();
 
-	private static final String[] MIFARE_CLASSIC_TYPES = { "TYPE_UNKNOWN",
-			"TYPE_CLASSIC", "TYPE_PLUS", "TYPE_PRO" };
-	private static final String[] MIFARE_UNLTRALIGHT_TYPES = { "TYPE_UNKNOWN",
-			"TYPE_ULTRALIGHT", "TYPE_ULTRALIGHT_C" };
-	private static final String[] MIFARE_UNLTRALIGHT_SIZES = { "unknown", "48",
-			"144" };
-
 	private NfcAdapter mNfcAdapter;
 
 	private PendingIntent pendingIntent;
@@ -66,9 +57,9 @@ public class NFCPlugin extends UnityPlayerActivity {
 	String[][] techListsArray;
 
 	private static String value = "";
-	private static String info = "";
+	private static String tech = "";
+	private static String id = "";
 	private static Tag tag;
-	private static TagTechnology currentTag = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,70 +136,41 @@ public class NFCPlugin extends UnityPlayerActivity {
 	private void handleIntent(Intent intent) {
 		Log.i(NFCPlugin.class.toString(), "handleIntent(" + intent + ")");
 		tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-		info = readTagTech(intent);
+		tech = readTech(intent);
 		value = read(intent);
-		// Log.i(NFCPlugin.class.toString(),
-		// "read: " + value + "; tag = " + tag.toString());
+		try {
+			byte[] idBytes = tag.getId();
+			if (idBytes == null || idBytes.length == 0) {
+				id = "";
+			} else {
+				id = "";
+				for (int i = 0; i < idBytes.length; i++) {
+					id += new Integer(idBytes[i]).toString();
+				}
+			}
+		} catch (Exception exc) {
+			Log.e(NFCPlugin.class.toString(), exc.getMessage());
+		}
+		Log.i(NFCPlugin.class.toString(),
+				"read: " + value + "; tag = " + tag.toString());
+//		UnityPlayer.UnitySendMessage("NFCText", "NFCRead", value);
 	}
 
-	private String readTagTech(Intent intent) {
+	private String readTech(Intent intent) {
 		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
-		for (String tech : tag.getTechList()) {
-			// Log.i(NFCPlugin.class.toString(), "Techlist contains: <" + tech
-			// + ">");
-			if ("android.nfc.tech.MifareClassic".equals(tech)) {
-				currentTag = MifareClassic.get(tag);
-			}
-			if ("android.nfc.tech.MifareUltralight".equals(tech)) {
-				currentTag = MifareUltralight.get(tag);
-			}
-			writer = NFCWriter.create(currentTag);
-			return logDetails(currentTag);
-		}
-		return "Unknown type of NFC Tag found.";
-	}
+		String[] techs = tag.getTechList();
 
-	private String logDetails(TagTechnology tag) {
-		String logString = "";
-		if (MifareClassic.class.isAssignableFrom(tag.getClass())) {
-			logString += logDetails((MifareClassic) tag);
-			return logString;
-		}
-		if (MifareUltralight.class.isAssignableFrom(tag.getClass())) {
-			logString += logDetails((MifareUltralight) tag);
-			return logString;
-		}
-		// DEFAULT:
-		logString = "Unknown type of NFC Tag found.";
-		// Log.i(NFCPlugin.class.toString(), logString);
-		return logString;
-	}
+		String allTechs = "";
 
-	private String logDetails(MifareClassic mifareClassic) {
-		String logString = "MifareClassic with size: "
-				+ mifareClassic.getSize();
-		// Log.i(NFCPlugin.class.toString(), logString);
-		int typeIndex = mifareClassic.getType() + 1;
-		if (typeIndex < 0 || typeIndex >= MIFARE_CLASSIC_TYPES.length)
-			typeIndex = 0;
-		String logString2 = "MifareClassic of type: "
-				+ MIFARE_CLASSIC_TYPES[typeIndex];
-		// Log.i(NFCPlugin.class.toString(), logString2);
-		return logString + "\n" + logString2;
-	}
+		for (int i = 0; i < techs.length; i++) {
+			allTechs = allTechs.concat(techs[i]
+					+ (i+1 < techs.length ? ", " : "."));
+		}
 
-	private String logDetails(MifareUltralight mifareUltralight) {
-		int typeIndex = mifareUltralight.getType() + 1;
-		if (typeIndex < 0 || typeIndex >= MIFARE_UNLTRALIGHT_TYPES.length)
-			typeIndex = 0;
-		String logString = "MifareUltralight with size: "
-				+ MIFARE_UNLTRALIGHT_SIZES[typeIndex];
-		// Log.i(NFCPlugin.class.toString(), logString);
-		String logString2 = "MifareUltralight of type: "
-				+ MIFARE_UNLTRALIGHT_TYPES[typeIndex];
-		// Log.i(NFCPlugin.class.toString(), logString2);
-		return logString + "\n" + logString2;
+		Log.i(NFCPlugin.class.toString(), "Techlist : <" + allTechs + ">");
+
+		return allTechs;
 	}
 
 	private String read(Intent intent) {
@@ -286,7 +248,7 @@ public class NFCPlugin extends UnityPlayerActivity {
 	 * @return The content of the last scanned NFC tag.
 	 */
 	public static String getValue() {
-		return "Info:\n" + info + "\n\nValue: " + value;
+		return "ID: " + id + "\nTech:\n" + tech + "\n\nValue: " + value;
 	}
 
 	/**

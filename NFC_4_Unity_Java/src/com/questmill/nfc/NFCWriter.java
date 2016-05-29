@@ -16,6 +16,9 @@ public abstract class NFCWriter {
 	}
 
 	public static NFCWriter create(TagTechnology tag) {
+		if (tag == null) {
+			throw new IllegalArgumentException("tag is null.");
+		}
 		if (MifareClassic.class.isAssignableFrom(tag.getClass())) {
 			return new MifareClassicWriter(tag);
 		}

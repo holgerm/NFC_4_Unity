@@ -4,9 +4,10 @@
 	<property name="sdk.dir" value="/Applications/eclipse-adt-bundle/sdk/" />
 	<property name="target" value="android-20" />
 	<property name="unity.androidplayer.jarfile"
-		value="/Applications/Unity/Unity.app/Contents/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Release/Classes/classes.jar" />
+		value="/Applications/Unity/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Release/Classes/classes.jar" />
 	<!-- Source directory -->
 	<property name="source.dir" value="${project.dir}/NFC_4_Unity_Java/src" />
+	<property name="test.dir" value="${project.dir}/NFC_4_Unity_Java/test" />
 	<!-- Libraries directories -->
 	<property name="java.dir" value="${project.dir}/NFC_4_Unity_Java" />
 	<property name="libs.dir" value="${project.dir}/NFC_4_Unity_Java/libs" />
@@ -36,6 +37,19 @@
 			</classpath>
 		</javac>
 	</target>
+	<target name="compile-with-test" depends="-dirs"
+		description="Compiles project's .java files including tests into .class files">
+		<javac encoding="ascii" target="1.7" source="1.7" debug="true"
+			destdir="${output.dir}" verbose="${verbose}" includeantruntime="false"
+			compiler="modern">
+			<src path="${source.dir};${test.dir}" />
+			<classpath>
+				<pathelement location="${sdk.dir}/platforms/${target}/android.jar" />
+				<pathelement location="${unity.androidplayer.jarfile}" />
+				<fileset dir="${libs.dir}" includes="*.jar" />
+			</classpath>
+		</javac>
+	</target>
 	<target name="build-plugin" depends="clean-build,compile"
 		description="Puts jar, manifest and libs to unity plugin folder.">
 		<zip zipfile="${output.jarfile}" basedir="${output.dir}" />
@@ -54,9 +68,7 @@
 		<delete dir="${output.dir}" verbose="${verbose}" />
 	</target>
 	<target name="clean-build" description="Removes all built files.">
-		<delete verbose="${verbose}">
-			<fileset dir="${unity.dir}" />
-		</delete>
+		<delete verbose="${verbose}" file="${output.jarfile}" />
 	</target>
 	<target name="message">
 		<echo>Android Ant Build for Unity NFC Plugin</echo>
@@ -67,4 +79,5 @@
 		<echo> build-jar: Compiles project's .class files into .jar file.
 		</echo>
 	</target>
+	<target name="all" depends="clean-build,clean,compile,build-plugin" />
 </project>
