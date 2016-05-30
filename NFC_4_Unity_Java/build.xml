@@ -55,10 +55,11 @@
 		<zip zipfile="${output.jarfile}" basedir="${output.dir}" />
 		<echo>Creating libs directory: ${libs.unity.dir}</echo>
 		<mkdir dir="${unity.dir}/libs" />
-		<copy todir="${unity.dir}/libs">
+		<copy todir="${unity.dir}/libs" overwrite="true">
 			<fileset dir="${libs.dir}" />
 		</copy>
-		<copy file="${java.dir}/AndroidManifest.xml" todir="${unity.dir}" />
+		<copy overwrite="true" file="${java.dir}/AndroidManifest.xml"
+			todir="${unity.dir}" />
 	</target>
 	<target name="clean-post-jar">
 		<echo>Removing post-build-jar-clean</echo>

@@ -33,23 +33,23 @@ public class NFC_Read : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		#if UNITY_ANDROID 
-		if (RuntimePlatform.Android != Application.platform)
-			return;
-		if (textReadFromNFC != null) {
-			textReadFromNFC.text = NFC.lastReadContent;
-		}
-		#endif
+//		#if UNITY_ANDROID 
+//		if (RuntimePlatform.Android != Application.platform)
+//			return;
+//		if (textReadFromNFC != null) {
+//			textReadFromNFC.text = NFC.lastReadContent;
+//		}
+//		#endif
 	}
 
 	void NFCRead (string textRead)
 	{
 		#if UNITY_ANDROID 
-//		if (RuntimePlatform.Android != Application.platform)
-//			return;
-//		if (textReadFromNFC != null) {
-//			textReadFromNFC.text = textRead;
-//		}
+		if (RuntimePlatform.Android != Application.platform)
+			return;
+		if (textReadFromNFC != null) {
+			textReadFromNFC.text = textRead;
+		}
 		Debug.Log ("NFCRead()");
 		#endif
 
