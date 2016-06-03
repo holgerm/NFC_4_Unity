@@ -3,7 +3,9 @@ using System.Collections;
 using System;
 
 /// <summary>
-/// Marshalled content has this format:
+/// NFC_Info represents the data stored on an NFC chip.
+/// 
+/// I order to be transmitted between Java and C# the data is mashalled using this format:
 /// 
 /// key:value,key:value,key:value etc.
 /// 
@@ -13,41 +15,58 @@ using System;
 /// Therefore the unmarshall method searches for double DELIMITERs and replaces them by one single DELIMITER again. 
 /// Occurrences of single DELIMITER in the marshalled content will in contrast be interpreted as the end of the 
 /// currently parsed content and ignored but trigger the switch to searching for the next key.
+/// 
+/// NFC_Info is an immutable object.
 /// </summary>
-public struct NFC_Info
+public class NFC_Info
 {
 	private const char DELIMITER = ',';
 
 	private string _id;
 
+	/// <summary>
+	/// The Identifier of the NFC chip. In order to support usage in Dictionaries, this is an immutable field.
+	/// </summary>
+	/// <value>The identifier.</value>
 	public string Id {
 		get {
 			return _id;
 		}
-		set {
-			_id = value;
+		private set {
+			if (_id == null)
+				_id = value;
 		}
 	}
 
 	private string _payload;
 
+	/// <summary>
+	/// The payload (aka content) of the NFC chip. In order to support usage in Dictionaries, this is an immutable field.
+	/// </summary>
+	/// <value>The payload.</value>
 	public string Payload {
 		get {
 			return _payload;
 		}
-		set {
-			_payload = value;
+		private set {
+			if (_payload == null)
+				_payload = value;
 		}
 	}
 
 	private string[] _techs;
 
+	/// <summary>
+	/// The tech descriptions of the NFC chip. In order to support usage in Dictionaries, this is an immutable field.
+	/// </summary>
+	/// <value>The tech descriptions.</value>
 	public string[] Techs {
 		get {
 			return _techs;
 		}
-		set {
-			_techs = value;
+		private set {
+			if (_techs == null)
+				_techs = value;
 		}
 	}
 
@@ -55,10 +74,56 @@ public struct NFC_Info
 
 	public bool Valid {
 		get {
+			_valid &= (Id != null && Id.Length > 0);
+			_valid &= Payload != null;
 			return _valid;
 		}
-		set {
+		private set {
 			_valid = value;
+		}
+	}
+
+	public static bool operator == (NFC_Info info1, NFC_Info info2)
+	{
+		return ReferenceEquals (info1, info2);
+	}
+
+	public static bool operator != (NFC_Info info1, NFC_Info info2)
+	{
+		return !ReferenceEquals (info1, info2);
+	}
+
+	public override bool Equals (System.Object other)
+	{
+		bool equal = true;
+
+		equal &= other != null;
+
+		NFC_Info otherInfo = other as NFC_Info;
+
+		equal &= otherInfo != null;
+		equal &= this.Id == otherInfo.Id;
+		equal &= this.Payload == otherInfo.Payload;
+		if (this.Techs == null)
+			equal &= otherInfo.Techs == null;
+		else
+			for (int i = 0; equal && i < Techs.Length; i++)
+				equal &= this.Techs [i].Equals (otherInfo.Techs [i]);
+
+		return equal;
+	}
+
+	public override int GetHashCode ()
+	{
+		unchecked { // Overflow is fine, just wrap
+			int hash = 17;
+			if (Id != null)
+				hash = hash * 23 + Id.GetHashCode ();
+			if (Id != null)
+				hash = hash * 23 + Payload.GetHashCode ();
+			if (Id != null)
+				hash = hash * 23 + Techs.GetHashCode ();
+			return hash;
 		}
 	}
 
@@ -89,19 +154,21 @@ public struct NFC_Info
 
 			// parse value:
 			valueBuilder = new System.Text.StringBuilder ();
+
 			while (curIndex <= receivedChars.Length - 1) {
 
 				if (receivedChars [curIndex] != DELIMITER) {
 					// ordinary content:
 					valueBuilder.Append (receivedChars [curIndex]);
 					curIndex++;
-					continue; // ready to step one char further in gathering the value
+					continue; // do NOT store key-value but proceed to gather the value
 				}
 
 				if (curIndex == receivedChars.Length - 1) {
 					// the current is a ',' and the last in the array we interpret it as an empty value
 					// e.g. [i:,] => id = ""
-					// we do not have to do anything since the while loop will terminate
+					// we proceed one char and do not have to do anything since the while loop will terminate
+					curIndex++;
 				} else {
 					// now we look at the char after the first ',':
 					curIndex++;
@@ -117,11 +184,12 @@ public struct NFC_Info
 						// we found a single ',' which signifies the end of the value
 						// we keep the index pointing at the next key and finish with this value
 						// e.g. [i:123,p:hello] -> id = "123"; payload = "hello"
-						storeKV (key, valueBuilder.ToString ());
 						break; // leaving value gathering and go on with next key-value pair
 					}
 				}
 			}
+			// end of KV pair reached: store it
+			storeKV (key, valueBuilder.ToString ());
 		}
 	}
 
