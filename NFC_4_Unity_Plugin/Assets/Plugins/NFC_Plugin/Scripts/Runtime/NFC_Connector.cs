@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using com.questmill.unity.nfc;
 using UnityEngine.Events;
 
-public class NFC_Read : MonoBehaviour
+public class NFC_Connector : MonoBehaviour
 {
 	public Text NFCPayloadText;
 	public NFCReadPayloadEvent OnNFCReadPayload;
@@ -45,7 +44,7 @@ public class NFC_Read : MonoBehaviour
 	/// Called by Android Java Plugin when an NFC Tag is read. The read payload is given as parameter.
 	/// </summary>
 	/// <param name="payload">Payload.</param>
-	void NFCReadPayload (string payload)
+	public void NFCReadPayload (string payload)
 	{
 		#if UNITY_ANDROID 
 		if (RuntimePlatform.Android != Application.platform)
@@ -65,7 +64,7 @@ public class NFC_Read : MonoBehaviour
 	/// Then the different contents are made available to the game by triggering an event.
 	/// </summary>
 	/// <param name="id">ID.</param>
-	void NFCReadDetails (string marshalledContent)
+	public void NFCReadDetails (string marshalledContent)
 	{
 		#if UNITY_ANDROID 
 		if (RuntimePlatform.Android != Application.platform)

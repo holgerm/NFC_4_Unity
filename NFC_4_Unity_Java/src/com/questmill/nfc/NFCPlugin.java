@@ -46,7 +46,6 @@ public class NFCPlugin extends UnityPlayerActivity {
 	private NfcAdapter mNfcAdapter;
 
 	private PendingIntent pendingIntent;
-	private static NFCWriter writer;
 
 	IntentFilter[] mIntentFilter;
 
@@ -140,20 +139,4 @@ public class NFCPlugin extends UnityPlayerActivity {
 			sendMessage(RECEIVER_METHOD_NAME_DETAILS, info.getDetails());
 	}
 
-	/**
-	 * Accessible from Unity Plugin.
-	 * 
-	 * @return The feedback of the last call to the writer.
-	 */
-	public static String writeTestContent() {
-		if (writer != null) {
-			Log.i(NFCPlugin.class.toString(),
-					"Writer ok. We will write test content.");
-			return writer.write("Test text");
-		} else {
-			Log.i(NFCPlugin.class.toString(), "WRITER NOT INITIALIZED!");
-			return "WRITER NOT INITIALIZED!";
-		}
-
-	}
 }
