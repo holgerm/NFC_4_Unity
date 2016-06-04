@@ -50,9 +50,29 @@ public class NFC_Emulator : EditorWindow
 		techs = EditorGUILayout.TextField ("Tech Descriptions", techs);
 
 		// Read NFC Button:
-		if (GUILayout.Button ("Read NFC Chip"))
-			Debug.Log ("Here comes the code for emulating the reading ...");
-		// TODO
+		GUI.enabled = Application.isPlaying;
+		if (GUILayout.Button ("Read NFC Chip")) {
+			emulateNFCRead ();
+		}
+		GUI.enabled = true;
+	}
+
+	private void emulateNFCRead ()
+	{
+		// grab the nfc receiver: 
+		GameObject nfcReceiver = GameObject.Find ("/NFCReceiver");
+		if (nfcReceiver == null) {
+			Debug.LogError ("NFCReceiver missing. The NFC Plugin does not find the NFCReceiver GameObject, but it needs it.");
+			return;
+		}
+		NFC_Connector nfcConnector = nfcReceiver.GetComponent<NFC_Connector> ();
+		if (nfcConnector == null) {
+			Debug.LogError ("NFC_Connector missing. The NFC Plugin finds the NFCReceiver GameObject, but it lacks the NFC_Connector Script Component.");
+			return;
+		}
+
+		// use simple mode first:
+		nfcConnector.NFCReadPayload (payload);
 	}
 
 	void OnDisable ()

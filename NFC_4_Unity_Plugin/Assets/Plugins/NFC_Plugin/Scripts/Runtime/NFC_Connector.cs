@@ -47,14 +47,14 @@ public class NFC_Connector : MonoBehaviour
 	public void NFCReadPayload (string payload)
 	{
 		#if UNITY_ANDROID 
-		if (RuntimePlatform.Android != Application.platform)
-			return;
 		if (NFCPayloadText != null) {
 			NFCPayloadText.text = payload;
 		}
 		if (OnNFCReadPayload != null) {
 			OnNFCReadPayload.Invoke (payload);
 		}
+		#elif UNITY_EDITOR
+		Debug.LogWarning ("NFC Plugin only works on Android Platform.");
 		#endif
 	}
 
@@ -67,9 +67,6 @@ public class NFC_Connector : MonoBehaviour
 	public void NFCReadDetails (string marshalledContent)
 	{
 		#if UNITY_ANDROID 
-		if (RuntimePlatform.Android != Application.platform)
-			return;
-
 		NFC_Info info = new NFC_Info (marshalledContent);
 
 		if (NFCIdText != null) {
@@ -80,6 +77,8 @@ public class NFC_Connector : MonoBehaviour
 		}
 		if (OnNFCReadDetails != null)
 			OnNFCReadDetails.Invoke (info);
+		#elif UNITY_EDITOR
+		Debug.LogWarning ("NFC Plugin only works on Android Platform.");
 		#endif
 	}
 }
