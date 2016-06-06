@@ -18,7 +18,7 @@ public class NFCPlugin extends UnityPlayerActivity {
 	 * The name of the game object in the Unity scene that receives calls from
 	 * us.
 	 */
-	private static final String RECEIVER_GAME_OBJECT_NAME = "NFCReceiver";
+	private static final String RECEIVER_GAME_OBJECT_NAME = "NFC_Connector";
 
 	/**
 	 * The name of the value receiver method on the game object.

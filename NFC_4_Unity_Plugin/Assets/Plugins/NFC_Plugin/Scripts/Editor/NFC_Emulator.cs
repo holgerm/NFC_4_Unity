@@ -60,7 +60,7 @@ public class NFC_Emulator : EditorWindow
 	private void emulateNFCRead ()
 	{
 		// grab the nfc receiver: 
-		GameObject nfcReceiver = GameObject.Find ("/NFCReceiver");
+		GameObject nfcReceiver = GameObject.Find ("/NFC_Connector");
 		if (nfcReceiver == null) {
 			Debug.LogError ("NFCReceiver missing. The NFC Plugin does not find the NFCReceiver GameObject, but it needs it.");
 			return;
