@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class NFC_ReaderUI : MonoBehaviour
 {
+	// TODO automatically search for suitable TEXT fields in Inspector (cf. old code)
 
+	[NFCReadTextPropertyAttribute]
 	public Text NFCPayloadText;
 	public NFCReadPayloadEvent OnNFCReadPayload;
 
