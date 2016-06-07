@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
+using System;
 
 public class NFC_Emulator : EditorWindow
 {
@@ -51,13 +52,16 @@ public class NFC_Emulator : EditorWindow
 
 		// Read NFC Button:
 		GUI.enabled = Application.isPlaying;
-		if (GUILayout.Button ("Read NFC Chip")) {
-			emulateNFCRead ();
+		if (GUILayout.Button ("Read NFC Chip (simple mode)")) {
+			emulateNFCRead (true);
+		}
+		if (GUILayout.Button ("Read NFC Chip (event mode)")) {
+			emulateNFCRead (false);
 		}
 		GUI.enabled = true;
 	}
 
-	private void emulateNFCRead ()
+	private void emulateNFCRead (bool simpleMode)
 	{
 		// grab the nfc receiver: 
 		GameObject nfcReceiver = GameObject.Find ("/NFC_Connector");
@@ -71,8 +75,13 @@ public class NFC_Emulator : EditorWindow
 			return;
 		}
 
-		// use simple mode first:
-		nfcConnector.NFCReadPayload (payload);
+		if (simpleMode)
+			nfcConnector.NFCReadPayload (payload);
+		else {
+			string[] techsArray = techs.Split (new char[] { ',' });
+			NFC_Info info = new NFC_Info (id, payload, techsArray);
+			nfcConnector.NFCReadDetails (info.marshall ());
+		}
 	}
 
 	void OnDisable ()

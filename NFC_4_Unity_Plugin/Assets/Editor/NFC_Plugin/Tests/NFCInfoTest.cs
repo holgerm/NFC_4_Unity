@@ -126,4 +126,48 @@ public class NFCInfoTest
 		Assert.That (!nfcInfoGarbish.Valid);
 	}
 
+	[Test]
+	public void MarshallTypicalCase ()
+	{
+		// Arrange:
+		NFC_Info info = new NFC_Info ("001", "hallo", new string[] { "nfc.tech.NDEF", "nfc.tech.nfcA" });
+
+		// Act:
+		string marshalled = info.marshall ();
+
+		// Assert:
+		Assert.That (marshalled.Equals ("i:001,p:hallo,t:nfc.tech.NDEF,,nfc.tech.nfcA"));
+	}
+
+	[Test]
+	public void MarshallCommasInPayload ()
+	{
+		// Arrange:
+		NFC_Info info = new NFC_Info ("001", "Hi, we can deal with commas, like this, too.", new string[] {
+			"nfc.tech.NDEF",
+			"nfc.tech.nfcA"
+		});
+
+		// Act:
+		string marshalled = info.marshall ();
+
+		// Assert:
+		Assert.That (marshalled.Equals ("i:001,p:Hi,, we can deal with commas,, like this,, too.,t:nfc.tech.NDEF,,nfc.tech.nfcA"));
+	}
+
+	[Test]
+	public void MarshallWithoutTechs ()
+	{
+		// Arrange:
+		NFC_Info info = new NFC_Info ("001", "Hi, we can deal with commas, like this, too.");
+
+		// Act:
+		string marshalled = info.marshall ();
+
+		// Assert:
+		Assert.That (marshalled.Equals ("i:001,p:Hi,, we can deal with commas,, like this,, too."));
+	}
+
+	// TODO what if id or payload are empty?
+
 }

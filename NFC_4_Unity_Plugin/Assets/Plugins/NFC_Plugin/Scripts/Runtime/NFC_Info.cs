@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Text;
 
 /// <summary>
 /// NFC_Info represents the data stored on an NFC chip.
 /// 
-/// I order to be transmitted between Java and C# the data is mashalled using this format:
+/// In order to be transmitted between Java and C# the data is mashalled using this format:
 /// 
 /// key:value,key:value,key:value etc.
 /// 
@@ -21,6 +22,10 @@ using System;
 public class NFC_Info
 {
 	private const char DELIMITER = ',';
+	private const char KEY_VALUE_DELIMITER = ':';
+	private const char KEY_ID = 'i';
+	private const char KEY_PAYLOAD = 'p';
+	private const char KEY_TECHS = 't';
 
 	private string _id;
 
@@ -137,6 +142,46 @@ public class NFC_Info
 		unmarshall (receivedString);
 	}
 
+	public NFC_Info (string id, string payload, string[] techs = null)
+	{
+		Id = id;
+		Payload = payload;
+		Techs = techs;
+		// TODO Valid ?
+	}
+
+	public string marshall ()
+	{
+		StringBuilder details = new StringBuilder ();
+
+		// id:
+		if (Id != null && !Id.Equals ("")) {
+			details.Append ("" + KEY_ID + KEY_VALUE_DELIMITER + maskCommas (Id));
+		}
+		// payload:
+		if (Payload != null && !Payload.Equals ("")) {
+			if (details.ToString ().Length > 0)
+				details.Append (DELIMITER);
+			details.Append ("" + KEY_PAYLOAD + KEY_VALUE_DELIMITER
+			+ maskCommas (Payload));
+		}
+		// tech:
+		if (Techs != null && !Techs.Equals ("")) {
+			details.Append (DELIMITER);
+			string tech = string.Join (",", Techs);
+			details.Append ("" + KEY_TECHS + KEY_VALUE_DELIMITER + maskCommas (tech));
+		}
+
+		return details.ToString ();
+	}
+
+	private string maskCommas (string original)
+	{
+		if (original == null || original.Equals (""))
+			return "";
+		return original.Replace (",", ",,");
+	}
+
 	private void unmarshall (string receivedString)
 	{
 		char[] receivedChars = receivedString.ToCharArray ();
@@ -196,13 +241,13 @@ public class NFC_Info
 	private void storeKV (char key, string value)
 	{
 		switch (key) {
-		case 'i':
+		case KEY_ID:
 			Id = value;
 			break;
-		case 'p':
+		case KEY_PAYLOAD:
 			Payload = value;
 			break;
-		case 't':
+		case KEY_TECHS:
 			Techs = value.Split (new string[] { "," }, System.StringSplitOptions.RemoveEmptyEntries);
 			break;
 		default:
