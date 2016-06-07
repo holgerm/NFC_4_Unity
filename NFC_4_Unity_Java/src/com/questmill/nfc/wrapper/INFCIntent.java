@@ -29,6 +29,14 @@ public interface INFCIntent {
 			.put((byte) 0x20, "urn:epc:pat:").put((byte) 0x21, "urn:epc:raw:")
 			.put((byte) 0x22, "urn:epc:").put((byte) 0x23, "urn:nfc:").build();
 
+	public static final char DELIMITER = ',';
+
+	public static final char KEY_ID = 'i';
+
+	public static final char KEY_PAYLOAD = 'p';
+
+	public static final char KEY_TECHS = 't';
+
 	String readID();
 
 	String readPayload();
