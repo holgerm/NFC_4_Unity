@@ -39,7 +39,7 @@
 	</target>
 	<target name="compile-with-test" depends="-dirs"
 		description="Compiles project's .java files including tests into .class files">
-		<javac encoding="ascii" target="1.7" source="1.7" debug="true"
+		<javac target="1.7" source="1.7" debug="true"
 			destdir="${output.dir}" verbose="${verbose}" includeantruntime="false"
 			compiler="modern">
 			<src path="${source.dir};${test.dir}" />

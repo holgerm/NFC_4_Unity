@@ -1,175 +1,178 @@
 package com.questmill.nfc;
 
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.primitives.Bytes;
-
-import android.content.Intent;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
-import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.os.Parcelable;
-import android.util.Log;
+import com.questmill.nfc.wrapper.INFCIntent;
 
 public class NFCInfo {
+
+	private static final char DELIMITER = ',';
+	private static final char KEY_VALUE_DELIMITER = ':';
+	private static final char KEY_ID = 'i';
+	private static final char KEY_PAYLOAD = 'p';
+	private static final char KEY_TECH = 't';
 
 	private String id;
 	private String tech;
 	private String payload;
-	private Tag tag;
 
-	public NFCInfo(Intent intent) {
-		Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-		this.id = readID(tag);
-		this.tech = readTech(intent);
-		this.payload = readPayload(intent);
-	}
+	// private Tag tag;
 
-	/**
-	 * @return creates a transferable string containing the payload informations
-	 *         of the NFC chip.
-	 */
-	private String marshall(String content) {
-		// TODO Auto-generated method stub
-		return null;
+	public NFCInfo(INFCIntent nfcIntent) {
+		this.id = nfcIntent.readID();
+		this.tech = nfcIntent.readTech();
+		this.payload = nfcIntent.readPayload();
 	}
 
 	public String getPayload() {
 		return payload;
 	}
 
-	public String getDetails() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	/**
+	 * In order to be transmitted between Java and C# the data is mashalled
+	 * using this format:
+	 * 
+	 * key:value,key:value,key:value etc.
+	 * 
+	 * Where key is a char that can be i for id, p for payload, t for techlist.
+	 * And value is the original content from the NFC chip, except for
+	 * occurrences of the DELIMITER character which are doubled. I.e. every
+	 * occurrence of ',' in the content has been replaced by ',,'. Therefore the
+	 * unmarshall method searches for double DELIMITERs and replaces them by one
+	 * single DELIMITER again. Occurrences of single DELIMITER in the marshalled
+	 * content will in contrast be interpreted as the end of the currently
+	 * parsed content and ignored but trigger the switch to searching for the
+	 * next key.
+	 * 
+	 * @return creates a transferable string containing the payload informations
+	 *         of the NFC chip.
+	 */
+	public String marshall() {
+		StringBuilder details = new StringBuilder();
 
-	private String readTech(Intent intent) {
-		this.tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
-		String[] techs = tag.getTechList();
-		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0; i < techs.length; i++) {
-			builder.append(techs[i] + (i + 1 < techs.length ? "," : ""));
+		// id:
+		if (id != null && !id.isEmpty()) {
+			details.append("" + KEY_ID + KEY_VALUE_DELIMITER + maskCommas(id));
+		}
+		// payload:
+		if (payload != null && !payload.isEmpty()) {
+			if (details.length() > 0)
+				details.append(DELIMITER);
+			details.append("" + KEY_PAYLOAD + KEY_VALUE_DELIMITER
+					+ maskCommas(payload));
+		}
+		// tech:
+		if (tech != null && !tech.isEmpty()) {
+			details.append(DELIMITER);
+			details.append("" + KEY_TECH + KEY_VALUE_DELIMITER + maskCommas(tech));
 		}
 
-		return builder.toString();
+		return details.toString();
 	}
 
-	private String readID(Tag tag) {
-		String id;
-		try {
-			byte[] idBytes = tag.getId();
-			if (idBytes == null || idBytes.length == 0) {
-				id = "";
-			} else {
-				id = "";
-				for (int i = 0; i < idBytes.length; i++) {
-					id += new Integer(idBytes[i]).toString();
-				}
-			}
-			return id;
-		} catch (Exception exc) {
-			Log.e(NFCPlugin.class.toString(), exc.getMessage());
-			return ERROR_NFC_TAG_ID_NOT_READABLE;
-		}
+	private String maskCommas(String originalContent) {
+		if (originalContent == null || originalContent.isEmpty())
+			return "";
+		return originalContent.replaceAll(",", ",,");
 	}
 
-	private String readPayload(Intent intent) {
-		if (tag == null) {
-			return "ERROR: NO TAG";
-		} else {
-			// Parses through all NDEF messages and their records and picks text
-			// and uri type.
-			Parcelable[] data = intent
-					.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-			String s = "";
-			if (data != null) {
-				try {
-					for (int i = 0; i < data.length; i++) {
-						NdefRecord[] recs = ((NdefMessage) data[i])
-								.getRecords();
-						for (int j = 0; j < recs.length; j++) {
-							if (recs[j].getTnf() == NdefRecord.TNF_WELL_KNOWN
-									&& Arrays.equals(recs[j].getType(),
-											NdefRecord.RTD_TEXT)) {
-								/*
-								 * See NFC forum specification for
-								 * "Text Record Type Definition" at 3.2.1
-								 * 
-								 * http://www.nfc-forum.org/specs/
-								 * 
-								 * bit_7 defines encoding bit_6 reserved for
-								 * future use, must be 0 bit_5..0 length of IANA
-								 * language code
-								 */
-								byte[] payload = recs[j].getPayload();
-								String textEncoding = ((payload[0] & 0200) == 0) ? "UTF-8"
-										: "UTF-16";
-								int langCodeLen = payload[0] & 0077;
-								s += new String(payload, langCodeLen + 1,
-										payload.length - langCodeLen - 1,
-										textEncoding);
-							} else if (recs[j].getTnf() == NdefRecord.TNF_WELL_KNOWN
-									&& Arrays.equals(recs[j].getType(),
-											NdefRecord.RTD_URI)) {
-								/*
-								 * See NFC forum specification for
-								 * "URI Record Type Definition" at 3.2.2
-								 * 
-								 * http://www.nfc-forum.org/specs/
-								 * 
-								 * payload[0] contains the URI Identifier Code
-								 * payload[1]...payload[payload.length - 1]
-								 * contains the rest of the URI.
-								 */
-								byte[] payload = recs[j].getPayload();
-								String prefix = (String) URI_PREFIX_MAP
-										.get(payload[0]);
-								byte[] fullUri = Bytes.concat(prefix
-										.getBytes(Charset.forName("UTF-8")),
-										Arrays.copyOfRange(payload, 1,
-												payload.length));
-								s += new String(fullUri,
-										Charset.forName("UTF-8"));
-							}
-						}
-					}
-				} catch (Exception e) {
-					payload = e.getMessage();
-					Log.e(NFCPlugin.class.toString(), e.getMessage());
-				}
-			}
-			return s;
-		}
-	}
+	// private String readTech(Intent intent) {
+	// this.tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	//
+	// String[] techs = tag.getTechList();
+	// StringBuilder builder = new StringBuilder();
+	//
+	// for (int i = 0; i < techs.length; i++) {
+	// builder.append(techs[i] + (i + 1 < techs.length ? "," : ""));
+	// }
+	//
+	// return builder.toString();
+	// }
+	//
+	// private String readID(Tag tag) {
+	// String id;
+	// try {
+	// byte[] idBytes = tag.getId();
+	// if (idBytes == null || idBytes.length == 0) {
+	// id = "";
+	// } else {
+	// id = "";
+	// for (int i = 0; i < idBytes.length; i++) {
+	// id += new Integer(idBytes[i]).toString();
+	// }
+	// }
+	// return id;
+	// } catch (Exception exc) {
+	// Log.e(NFCPlugin.class.toString(), exc.getMessage());
+	// return INFCIntent.ERROR_NFC_TAG_ID_NOT_READABLE;
+	// }
+	// }
 
-	@SuppressWarnings("rawtypes")
-	private static final BiMap URI_PREFIX_MAP = ImmutableBiMap.builder()
-			.put((byte) 0x00, "").put((byte) 0x01, "http://www.")
-			.put((byte) 0x02, "https://www.").put((byte) 0x03, "http://")
-			.put((byte) 0x04, "https://").put((byte) 0x05, "tel:")
-			.put((byte) 0x06, "mailto:")
-			.put((byte) 0x07, "ftp://anonymous:anonymous@")
-			.put((byte) 0x08, "ftp://ftp.").put((byte) 0x09, "ftps://")
-			.put((byte) 0x0A, "sftp://").put((byte) 0x0B, "smb://")
-			.put((byte) 0x0C, "nfs://").put((byte) 0x0D, "ftp://")
-			.put((byte) 0x0E, "dav://").put((byte) 0x0F, "news:")
-			.put((byte) 0x10, "telnet://").put((byte) 0x11, "imap:")
-			.put((byte) 0x12, "rtsp://").put((byte) 0x13, "urn:")
-			.put((byte) 0x14, "pop:").put((byte) 0x15, "sip:")
-			.put((byte) 0x16, "sips:").put((byte) 0x17, "tftp:")
-			.put((byte) 0x18, "btspp://").put((byte) 0x19, "btl2cap://")
-			.put((byte) 0x1A, "btgoep://").put((byte) 0x1B, "tcpobex://")
-			.put((byte) 0x1C, "irdaobex://").put((byte) 0x1D, "file://")
-			.put((byte) 0x1E, "urn:epc:id:").put((byte) 0x1F, "urn:epc:tag:")
-			.put((byte) 0x20, "urn:epc:pat:").put((byte) 0x21, "urn:epc:raw:")
-			.put((byte) 0x22, "urn:epc:").put((byte) 0x23, "urn:nfc:").build();
-
-	private static final String ERROR_NFC_TAG_ID_NOT_READABLE = "Error Ocurred: NFC Tag ID not readable";
+	// private String readPayload(Intent intent) {
+	// if (tag == null) {
+	// return "ERROR: NO TAG";
+	// } else {
+	// // Parses through all NDEF messages and their records and picks text
+	// // and uri type.
+	// Parcelable[] data = intent
+	// .getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+	// String s = "";
+	// if (data != null) {
+	// try {
+	// for (int i = 0; i < data.length; i++) {
+	// NdefRecord[] recs = ((NdefMessage) data[i])
+	// .getRecords();
+	// for (int j = 0; j < recs.length; j++) {
+	// if (recs[j].getTnf() == NdefRecord.TNF_WELL_KNOWN
+	// && Arrays.equals(recs[j].getType(),
+	// NdefRecord.RTD_TEXT)) {
+	// /*
+	// * See NFC forum specification for
+	// * "Text Record Type Definition" at 3.2.1
+	// *
+	// * http://www.nfc-forum.org/specs/
+	// *
+	// * bit_7 defines encoding bit_6 reserved for
+	// * future use, must be 0 bit_5..0 length of IANA
+	// * language code
+	// */
+	// byte[] payload = recs[j].getPayload();
+	// String textEncoding = ((payload[0] & 0200) == 0) ? "UTF-8"
+	// : "UTF-16";
+	// int langCodeLen = payload[0] & 0077;
+	// s += new String(payload, langCodeLen + 1,
+	// payload.length - langCodeLen - 1,
+	// textEncoding);
+	// } else if (recs[j].getTnf() == NdefRecord.TNF_WELL_KNOWN
+	// && Arrays.equals(recs[j].getType(),
+	// NdefRecord.RTD_URI)) {
+	// /*
+	// * See NFC forum specification for
+	// * "URI Record Type Definition" at 3.2.2
+	// *
+	// * http://www.nfc-forum.org/specs/
+	// *
+	// * payload[0] contains the URI Identifier Code
+	// * payload[1]...payload[payload.length - 1]
+	// * contains the rest of the URI.
+	// */
+	// byte[] payload = recs[j].getPayload();
+	// String prefix = (String) INFCIntent.URI_PREFIX_MAP
+	// .get(payload[0]);
+	// byte[] fullUri = Bytes.concat(prefix
+	// .getBytes(Charset.forName("UTF-8")),
+	// Arrays.copyOfRange(payload, 1,
+	// payload.length));
+	// s += new String(fullUri,
+	// Charset.forName("UTF-8"));
+	// }
+	// }
+	// }
+	// } catch (Exception e) {
+	// payload = e.getMessage();
+	// Log.e(NFCPlugin.class.toString(), e.getMessage());
+	// }
+	// }
+	// return s;
+	// }
+	// }
 
 }

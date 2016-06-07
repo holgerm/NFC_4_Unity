@@ -9,6 +9,7 @@ import android.nfc.tech.NfcF;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.questmill.nfc.wrapper.NFCIntent;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
 
@@ -30,10 +31,10 @@ public class NFCPlugin extends UnityPlayerActivity {
 	 */
 	private static final String RECEIVER_METHOD_NAME_DETAILS = "NFCReadDetails";
 
-	private static boolean simpleMode = true;
+	private static boolean simpleMode = false;
 
 	public static void setSimpleMode(boolean simpleMode) {
-		simpleMode = simpleMode;
+		NFCPlugin.simpleMode = simpleMode;
 	}
 
 	private void sendMessage(String messageType, String message) {
@@ -131,12 +132,12 @@ public class NFCPlugin extends UnityPlayerActivity {
 			return;
 		}
 
-		NFCInfo info = new NFCInfo(intent);
+		NFCInfo info = new NFCInfo(new NFCIntent(intent));
 
 		if (simpleMode)
 			sendMessage(RECEIVER_METHOD_NAME_PAYLOAD, info.getPayload());
 		else
-			sendMessage(RECEIVER_METHOD_NAME_DETAILS, info.getDetails());
+			sendMessage(RECEIVER_METHOD_NAME_DETAILS, info.marshall());
 	}
 
 }
