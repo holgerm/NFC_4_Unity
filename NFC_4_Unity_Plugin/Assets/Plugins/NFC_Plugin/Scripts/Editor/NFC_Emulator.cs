@@ -52,12 +52,15 @@ public class NFC_Emulator : EditorWindow
 
 		// Read NFC Button:
 		GUI.enabled = Application.isPlaying;
-		if (GUILayout.Button ("Read NFC Chip (simple mode)")) {
+		EditorGUILayout.BeginHorizontal ();
+		EditorGUILayout.PrefixLabel ("Read NFC Chip");
+		if (GUILayout.Button ("Simple mode")) {
 			emulateNFCRead (true);
 		}
-		if (GUILayout.Button ("Read NFC Chip (event mode)")) {
+		if (GUILayout.Button ("Event mode")) {
 			emulateNFCRead (false);
 		}
+		EditorGUILayout.EndHorizontal ();
 		GUI.enabled = true;
 	}
 

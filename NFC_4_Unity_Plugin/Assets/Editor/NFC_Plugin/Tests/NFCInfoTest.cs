@@ -6,7 +6,7 @@ public class NFCInfoTest
 {
 
 	[Test]
-	public void TypicalCase ()
+	public void UnmarshallTypicalCase ()
 	{
 		//Act
 		NFC_Info nfcInfo = new NFC_Info ("i:007,p:hello world!,t:nfc.tech.NfcA,,nfc.tech.Ndef");
@@ -21,7 +21,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void CommaUnmasking ()
+	public void UnmarshallCommaUnmasking ()
 	{
 		// Act:
 		NFC_Info nfcInfo = new NFC_Info ("i:001,p:This text,, as an example,, contains multiple masked commas,, like this one.,t:some.tech");
@@ -48,7 +48,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void Empty ()
+	public void UnmarshallEmpty ()
 	{
 		//Act
 		//Try to rename the GameObject
@@ -64,7 +64,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void NoId_PayloadSet ()
+	public void Unmarshall_NoId_PayloadSet ()
 	{
 		// Act:
 		NFC_Info nfcInfo_NoId_PayloadSet = new NFC_Info ("p:some content");
@@ -75,7 +75,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void IdEmpty_PayloadSet ()
+	public void Unmarshall_IdEmpty_PayloadSet ()
 	{
 		// Act:
 		NFC_Info nfcInfo_IdEmpty_PayloadSet = new NFC_Info ("i:,p:some content");
@@ -86,7 +86,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void IdSet_NoPayload ()
+	public void Unmarshall_IdSet_NoPayload ()
 	{
 		// Act:
 		NFC_Info nfcInfo_IdSet_NoPayload = new NFC_Info ("i:1");
@@ -97,7 +97,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void IdSet_PayloadEmpty ()
+	public void Unmarshall_IdSet_PayloadEmpty ()
 	{
 		// Act:
 		NFC_Info nfcInfo_IdSet_PayloadEmpty = new NFC_Info ("i:1,p:");
@@ -108,7 +108,7 @@ public class NFCInfoTest
 	}
 
 	[Test]
-	public void WrongContent ()
+	public void Unmarshall_WrongContent ()
 	{
 		// Act:
 		NFC_Info nfcInfoUndefinedKeys = new NFC_Info ("q:q is undefined,b:b ia also undefined,n:even n is not yet defined as key");
