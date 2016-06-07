@@ -42,6 +42,11 @@ public class NFC_ReaderUI : MonoBehaviour
 		NFC_Connector.Connector.unregisterReaderUI (this);
 	}
 
+	void OnDestroy ()
+	{
+		NFC_Connector.Connector.unregisterReaderUI (this);
+	}
+
 	// Update is called once per frame
 	void Update ()
 	{
