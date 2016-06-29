@@ -14,13 +14,14 @@ public class NFC_Connector : MonoBehaviour
 	private List<NFC_ReaderUI> registeredReaderUIs;
 
 	private static NFC_Connector _connector;
+	private static GameObject connectorGO;
 
 	public static NFC_Connector Connector {
 		get {
 			if (_connector == null) {
-				GameObject go = new GameObject (NAME);
-				go.AddComponent<NFC_Connector> ();
-				_connector = go.GetComponent<NFC_Connector> ();
+				connectorGO = new GameObject (NAME);
+				connectorGO.AddComponent<NFC_Connector> ();
+				_connector = connectorGO.GetComponent<NFC_Connector> ();
 			}
 			return _connector;
 		}
@@ -79,7 +80,6 @@ public class NFC_Connector : MonoBehaviour
 		Debug.LogWarning ("NFC Plugin only works on Android Platform.");
 		#endif
 	}
-
 
 }
 
