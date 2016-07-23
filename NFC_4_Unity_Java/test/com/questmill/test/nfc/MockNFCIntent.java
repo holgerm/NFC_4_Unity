@@ -123,7 +123,7 @@ public class MockNFCIntent implements INFCIntent {
 	}
 
 	public String[] readTechs() {
-		if (techs == null) {
+		if (techs == null || techs.equals("")) {
 			return new String[] {};
 		}
 		return techs.split(",");

@@ -1,7 +1,5 @@
 package com.questmill.test.nfc;
 
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -178,8 +176,6 @@ public class TestNFCInfo {
 	@Test
 	public void unmarshallMissingPayload() throws Exception {
 
-		Assert.fail();
-		
 		// Arrange & Act:
 		MockNFCIntent mockNFCIntent = new MockNFCIntent("i:1,p:");
 
@@ -194,33 +190,27 @@ public class TestNFCInfo {
 		Assert.assertEquals(techs.length, 0);
 
 	}
-
 
 	@Test
 	public void unmarshallEmptyTech() throws Exception {
 
-		Assert.fail();
-		// TODO
-	// Arrange & Act:
-		MockNFCIntent mockNFCIntent = new MockNFCIntent("i:1,p:");
+		// Arrange & Act:
+		MockNFCIntent mockNFCIntent = new MockNFCIntent("i:1,p:hello world!,t:");
 
 		// Assert:
 		String id = mockNFCIntent.readID();
 		Assert.assertEquals("1", id);
 		String payload = mockNFCIntent.readPayload();
 		Assert.assertNotNull(payload);
-		Assert.assertEquals("", payload);
+		Assert.assertEquals("hello world!", payload);
 		String[] techs = mockNFCIntent.readTechs();
 		Assert.assertNotNull(techs);
 		Assert.assertEquals(techs.length, 0);
 
 	}
-	
 
 	@Test
 	public void unmarshallMissingTechd() throws Exception {
-		Assert.fail();
-
 		// Arrange & Act:
 		MockNFCIntent mockNFCIntent = new MockNFCIntent("i:1,p:");
 
@@ -235,6 +225,5 @@ public class TestNFCInfo {
 		Assert.assertEquals(techs.length, 0);
 
 	}
-
 
 }
