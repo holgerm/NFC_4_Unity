@@ -1,12 +1,20 @@
 package com.questmill.nfc;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.nfc.FormatException;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcF;
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 
 import com.questmill.nfc.wrapper.NFCIntent;
@@ -132,12 +140,63 @@ public class NFCPlugin extends UnityPlayerActivity {
 			return;
 		}
 
+		tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
 		NFCInfo info = new NFCInfo(new NFCIntent(intent));
 
 		if (simpleMode)
 			sendMessage(RECEIVER_METHOD_NAME_PAYLOAD, info.getPayload());
 		else
 			sendMessage(RECEIVER_METHOD_NAME_DETAILS, info.marshall());
+	}
+
+	private static NdefRecord createRecord(String text)
+			throws UnsupportedEncodingException {
+
+		String lang = "en";
+		byte[] textBytes = text.getBytes();
+		byte[] langBytes = lang.getBytes("US-ASCII");
+		int langLength = langBytes.length;
+		int textLength = textBytes.length;
+
+		byte[] payload = new byte[1 + langLength + textLength];
+		payload[0] = (byte) langLength;
+
+		// copy langbytes and textbytes into payload
+		System.arraycopy(langBytes, 0, payload, 1, langLength);
+		System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
+
+		NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
+				NdefRecord.RTD_TEXT, new byte[0], payload);
+		return recordNFC;
+	}
+
+	public static void write(String text) {
+
+		String wrote = "[[nothing written]]";
+
+		Log.i("NFC UNITY", "Java side received call to write: " + text);
+
+		try {
+			NdefRecord[] records = { createRecord(text) };
+			NdefMessage message = new NdefMessage(records);
+			if (tag == null) {
+				Log.e("NFC UNITY", "No Tag scanned recently.");
+				return;
+			}
+			Ndef ndef = Ndef.get(tag);
+			ndef.connect();
+			ndef.writeNdefMessage(message);
+			ndef.close();
+
+			wrote = message.toString();
+		} catch (IOException exc) {
+			Log.e("NFC UNITY", "IOExc: " + exc.getMessage());
+		} catch (FormatException exc) {
+			Log.e("NFC UNITY", "FormatExc: " + exc.getMessage());
+
+		}
+		Log.i("NFC UNITY", "Java side wrote to tag: " + wrote);
 	}
 
 }
