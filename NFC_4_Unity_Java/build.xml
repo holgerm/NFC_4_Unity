@@ -11,13 +11,20 @@
 	<!-- Libraries directories -->
 	<property name="java.dir" value="${project.dir}/NFC_4_Unity_Java" />
 	<property name="libs.dir" value="${project.dir}/NFC_4_Unity_Java/libs" />
+	<!-- Path to the plugin dir in unity project -->
 	<property name="unity.dir"
-		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/Android" />
-	<!-- Output directory for .class files -->
-	<property name="output.dir" value="${project.dir}/NFC_4_Unity_Java/bin" />
-	<!-- Name of the jar to be created -->
-	<property name="output.jarfile"
-		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/Android/NFC_4_Unity_Plugin.jar" />
+		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/NFC4Unity" />
+	<!-- Path to class files in Java project -->
+	<property name="output.dir" value="${project.dir}/NFC_4_Unity_Java/bin"></property>
+	<!-- Path to the plugin android subdir in unity project -->
+	<property name="unity.androiddir"
+		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/NFC4Unity/Android" />
+	<!-- Name of the jar to be created at place in unity project -->
+	<property name="unity.jarfile"
+		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/NFC4Unity/Android/NFC_4_Unity_Plugin.jar" />
+	<!-- Path to the manifest to be created at place in unity project -->
+	<property name="unity.manifestfile"
+		value="${project.dir}/NFC_4_Unity_Plugin/Assets/Plugins/Android/AndroidManifest.xml" />
 	<!-- Creates the output directories if they don't exist yet. -->
 	<target name="-dirs" depends="message">
 		<echo>Creating output directory: ${output.dir} </echo>
@@ -52,14 +59,14 @@
 	</target>
 	<target name="build-plugin" depends="clean-build,compile"
 		description="Puts jar, manifest and libs to unity plugin folder.">
-		<zip zipfile="${output.jarfile}" basedir="${output.dir}" />
+		<zip destfile="${unity.jarfile}" basedir="${output.dir}" />
 		<echo>Creating libs directory: ${libs.unity.dir}</echo>
-		<mkdir dir="${unity.dir}/libs" />
-		<copy todir="${unity.dir}/libs" overwrite="true">
+		<mkdir dir="${unity.androiddir}/libs" />
+		<copy todir="${unity.androiddir}/libs" overwrite="true">
 			<fileset dir="${libs.dir}" />
 		</copy>
 		<copy overwrite="true" file="${java.dir}/AndroidManifest.xml"
-			todir="${unity.dir}" />
+			tofile="${unity.manifestfile}" />
 	</target>
 	<target name="clean-post-jar">
 		<echo>Removing post-build-jar-clean</echo>
@@ -69,7 +76,9 @@
 		<delete dir="${output.dir}" verbose="${verbose}" />
 	</target>
 	<target name="clean-build" description="Removes all built files.">
-		<delete verbose="${verbose}" file="${output.jarfile}" />
+		<delete verbose="${verbose}" file="${unity.jarfile}" />
+		<delete verbose="${verbose}" file="${unity.manifestfile}" />
+		<delete dir="${unity.androiddir}" />
 	</target>
 	<target name="message">
 		<echo>Android Ant Build for Unity NFC Plugin</echo>
