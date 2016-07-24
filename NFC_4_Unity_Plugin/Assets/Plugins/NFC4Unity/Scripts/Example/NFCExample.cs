@@ -3,6 +3,8 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Text;
 using System;
+using QM.NFC;
+
 
 public class NFCExample : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class NFCExample : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-	
+		Screen.orientation = ScreenOrientation.Portrait;
 	}
 	
 	// Update is called once per frame
