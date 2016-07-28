@@ -14,8 +14,8 @@ import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcF;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.questmill.nfc.wrapper.NFCIntent;
 import com.unity3d.player.UnityPlayer;
